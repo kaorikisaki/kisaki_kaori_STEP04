@@ -18,30 +18,43 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $question = $_POST["question"];
     $gender   = $_POST["gender"];
 
-    // バリデーションチェック
-    
-    // age: 年齢は0から150の間で入力
+    // エラーメッセージを溜めるための配列を用意
+    $errors = [];
+
+    // 1) 年齢チェック (独立したif)
     if (!is_numeric($age) || $age < 0 || $age > 150) {
-        echo "<p>age:年齢は0から150の間で入力してください。</p>";
+        $errors[] = "age:年齢は0から150の間で入力してください。";
     } 
-    // name: ひらがな、カタカナ、漢字、英字のみ
-    elseif (!preg_match("/^[ぁ-んァ-ヶー一-龠a-zA-Z]+$/u", $name)) {
-        echo "<p>name:名前はひらがな、カタカナ、漢字、英字のみ使用できます。</p>";
+
+    // 2) 名前チェック (独立したif)
+    if (!preg_match("/^[ぁ-んァ-ヶー一-龠a-zA-Z]+$/u", $name)) {
+        $errors[] = "name:名前はひらがな、カタカナ、漢字、英字のみ使用できます。";
     } 
-    // phone: 半角数字とハイフンのみ
-    elseif (!preg_match("/^[0-9-]+$/", $phone)) {
-        echo "<p>phone:電話番号は半角数字とハイフンのみ使用できます。</p>";
+
+    // 3) 電話番号チェック (独立したif)
+    if (!preg_match("/^[0-9-]+$/", $phone)) {
+        $errors[] = "phone:電話番号は半角数字とハイフンのみ使用できます。";
     } 
-    // email: メールアドレスの形式
-    elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        echo "<p>email:メールアドレスの形式が正しくありません。</p>";
+
+    // 4) メールアドレスチェック (独立したif)
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $errors[] = "email:メールアドレスの形式が正しくありません。";
     } 
-    // address: ひらがな、カタカナ、漢字、英字のみ
-    elseif (!preg_match("/^[ぁ-んァ-ヶー一-龠a-zA-Z0-9]+$/u", $address)) {
-        echo "<p>address:住所はひらがな、カタカナ、漢字、英字のみ使用できます。</p>";
+
+    // 5) 住所チェック (独立したif)
+    if (!preg_match("/^[ぁ-んァ-ヶー一-龠a-zA-Z0-9]+$/u", $address)) {
+        $errors[] = "address:住所はひらがな、カタカナ、漢字、英字のみ使用できます。";
     } 
-    else {
-        // 条件通り入力された時の出力
+
+    // --- 判定結果の表示 ---
+
+    // もしエラーが1つでもあれば表示
+    if (count($errors) > 0) {
+        foreach ($errors as $error) {
+            echo "<p style='color:red;'>" . htmlspecialchars($error, ENT_QUOTES, 'UTF-8') . "</p>";
+        }
+    } else {
+        // エラーがない場合のみ、入力内容を出力
         echo "<p>名前: " . htmlspecialchars($name, ENT_QUOTES, 'UTF-8') . "</p>";
         echo "<p>年齢: " . htmlspecialchars($age, ENT_QUOTES, 'UTF-8') . "</p>";
         echo "<p>電話番号: " . htmlspecialchars($phone, ENT_QUOTES, 'UTF-8') . "</p>";
